@@ -1,0 +1,194 @@
+generator client {
+    provider = "prisma-client-js"
+}
+
+datasource db {
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
+}
+
+/// 计量单位
+model Unit {
+    id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+    name        String
+    min_value   Decimal? @db.Decimal(10, 2)
+    max_value   Decimal? @db.Decimal(10, 2)
+    description String?
+    created_by  String?  @db.Uuid
+    updated_by  String?  @db.Uuid
+    created_at  DateTime @default(now())
+    updated_at  DateTime @updatedAt
+
+    ingredients Ingredient[]
+}
+
+/// 食材大类
+model Category {
+    id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+    name       String
+    sort_order  Int      @default(0)
+    created_by  String?  @db.Uuid
+    updated_by  String?  @db.Uuid
+    created_at  DateTime @default(now())
+    updated_at  DateTime @updatedAt
+
+    ingredients Ingredient[]
+}
+
+/// 食材小类 / SKU
+model Ingredient {
+    id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+    sku_code    String   @unique
+    name        String
+    category_id String   @db.Uuid
+    unit_id     String   @db.Uuid
+    icon        String?
+    image_url   String?
+    description String?
+    created_by  String?  @db.Uuid
+    updated_by  String?  @db.Uuid
+    created_at  DateTime @default(now())
+    updated_at  DateTime @updatedAt
+
+    category       Category             @relation(fields: [category_id], references: [id])
+    unit           Unit                 @relation(fields: [unit_id], references: [id])
+    suppliers      IngredientSupplier[]
+    order_items    OrderItem[]
+
+    @@index([category_id])
+    @@index([sku_code])
+}
+
+/// 供应商
+model Supplier {
+    id             String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+    company_name   String
+    contact_name   String
+    contact_phone  String
+    license_number String?
+    created_by     String?  @db.Uuid
+    updated_by     String?  @db.Uuid
+    created_at     DateTime @default(now())
+    updated_at     DateTime @updatedAt
+
+    ingredients    IngredientSupplier[]
+    order_items    OrderItem[]
+}
+
+/// 食材-供应商关联
+model IngredientSupplier {
+    id            String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+    ingredient_id String  @db.Uuid
+    supplier_id   String  @db.Uuid
+    is_default    Boolean @default(false)
+
+    ingredient Ingredient @relation(fields: [ingredient_id], references: [id], onDelete: Cascade)
+    supplier   Supplier   @relation(fields: [supplier_id], references: [id], onDelete: Cascade)
+
+    @@unique([ingredient_id, supplier_id])
+}
+
+/// 餐厅
+model Restaurant {
+    id             String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+    name           String
+    contact_person String
+    contact_phone  String
+    address        String
+    created_by     String?  @db.Uuid
+    updated_by     String?  @db.Uuid
+    created_at     DateTime @default(now())
+    updated_at     DateTime @updatedAt
+
+    members           MemberRestaurant[]
+    orders            Order[]
+}
+
+/// 成员/人员
+model Member {
+    id              String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+    name            String
+    phone           String
+    avatar_url      String?
+    password        String?
+    role_type       String   @default("user") // admin 店长, user 员工
+    wx_openid       String?  @unique
+    wx_unionid      String?
+    wx_session_key  String?
+    wx_avatar_url   String?
+    wx_nickname     String?
+    created_by      String?  @db.Uuid
+    updated_by      String?  @db.Uuid
+    created_at      DateTime @default(now())
+    updated_at      DateTime @updatedAt
+
+    restaurants MemberRestaurant[]
+}
+
+/// 成员-餐厅关联
+model MemberRestaurant {
+    id            String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+    member_id     String @db.Uuid
+    restaurant_id String @db.Uuid
+
+    member     Member     @relation(fields: [member_id], references: [id], onDelete: Cascade)
+    restaurant Restaurant @relation(fields: [restaurant_id], references: [id], onDelete: Cascade)
+
+    @@unique([member_id, restaurant_id])
+}
+
+/// 订单
+model Order {
+    id            String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+    request_no    String   @unique
+    restaurant_id String   @db.Uuid
+    status        String   @default("pending")
+    submitted_at  DateTime @default(now())
+    created_by    String?  @db.Uuid
+    updated_by    String?  @db.Uuid
+    created_at    DateTime @default(now())
+    updated_at    DateTime @updatedAt
+
+    restaurant Restaurant  @relation(fields: [restaurant_id], references: [id])
+    items      OrderItem[]
+
+    @@index([status])
+    @@index([restaurant_id])
+    @@map("orders")
+}
+
+/// 订单明细
+model OrderItem {
+    id            String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+    request_id    String  @db.Uuid
+    ingredient_id String  @db.Uuid
+    quantity      Decimal @db.Decimal(10, 2)
+    supplier_id   String? @db.Uuid
+
+    order      Order       @relation(fields: [request_id], references: [id], onDelete: Cascade)
+    ingredient Ingredient  @relation(fields: [ingredient_id], references: [id])
+    supplier   Supplier?   @relation(fields: [supplier_id], references: [id])
+
+    @@map("order_items")
+}
+
+/// 操作日志
+model AuditLog {
+    id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+    user_id     String?  @db.Uuid
+    user_name   String?
+    action      String   /// 操作类型：login / logout / create / update / delete / approve 等
+    module      String   /// 模块名称：auth / category / ingredient / supplier / restaurant / member / order / unit
+    target_id   String?  @db.Uuid /// 操作对象 ID
+    detail      String?  /// 操作详情（JSON 格式）
+    result      String   @default("success") /// 操作结果：success / fail
+    ip          String?  /// 客户端 IP
+    user_agent  String?  /// 客户端 User-Agent
+    created_at  DateTime @default(now())
+
+    @@index([user_id])
+    @@index([module])
+    @@index([action])
+    @@index([created_at])
+    @@map("audit_logs")
+}

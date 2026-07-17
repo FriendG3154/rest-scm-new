@@ -1,0 +1,314 @@
+<view class="summary-page">
+  <!-- 顶部导航栏 -->
+  <view class="nav-bar" style="padding-top: {{statusBarHeight}}px;">
+    <view class="nav-bar-inner">
+      <view class="nav-bar-left">
+        <text class="nav-bar-title font-headline">清单汇总</text>
+      </view>
+    </view>
+    <view class="nav-bar-divider"></view>
+  </view>
+
+  <!-- 审核状态 tab（仅当同时存在已审核和未审核数据时显示） -->
+  <view class="status-tab-section" wx:if="{{showStatusTab}}" style="margin-top: {{navHeight}}px;">
+    <view class="status-tab-bar">
+      <view class="status-tab-item {{statusTab === 0 ? 'status-tab-active' : ''}}" bind:tap="onStatusTabChange" data-tab="0">
+        <text>未审核</text>
+      </view>
+      <view class="status-tab-item {{statusTab === 1 ? 'status-tab-active' : ''}}" bind:tap="onStatusTabChange" data-tab="1">
+        <text>已审核</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 分段控制器 -->
+  <view class="tab-section" style="{{showStatusTab ? '' : 'margin-top: ' + navHeight + 'px;'}}">
+    <view class="segment-control">
+      <view class="segment-item {{activeTab === 0 ? 'segment-active' : ''}}" bind:tap="onTabChange" data-tab="0">
+        <text>按供应商</text>
+      </view>
+      <view class="segment-item {{activeTab === 1 ? 'segment-active' : ''}}" bind:tap="onTabChange" data-tab="1">
+        <text>按餐厅</text>
+      </view>
+      <view class="segment-item {{activeTab === 2 ? 'segment-active' : ''}}" bind:tap="onTabChange" data-tab="2">
+        <text>按食材</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 内容区域 -->
+  <scroll-view scroll-y class="summary-scroll" enhanced show-scrollbar="{{false}}" refresher-enabled refresher-triggered="{{refreshing}}" bindrefresherrefresh="onRefresh">
+    <view class="loading-wrap" wx:if="{{loading}}">
+      <t-loading theme="circular" size="48rpx" />
+    </view>
+
+    <!-- 按供应商视图 -->
+    <view wx:if="{{activeTab === 0 && !loading}}">
+      <view class="supplier-section" wx:for="{{supplierGroups}}" wx:key="id" wx:for-index="sIdx">
+        <view class="section-header">
+          <view class="section-header-left">
+            <text class="section-title font-headline">{{item.name}}</text>
+          </view>
+          <view wx:if="{{currentStatus === 'approved'}}" class="send-btn" bind:tap="onSendToSupplier" data-supplier="{{item}}">
+            <t-icon name="share" size="28rpx" color="#002045" />
+            <text class="send-btn-text">发送供应商</text>
+          </view>
+        </view>
+        <view class="item-cards">
+          <block wx:for="{{item.items}}" wx:for-item="food" wx:key="id" wx:for-index="fIdx">
+            <!-- 单餐厅：整项可编辑可滑动删除 -->
+            <view wx:if="{{!food.multiRestaurant}}" class="swipe-wrapper">
+              <view class="swipe-inner {{food._animating ? 'swipe-animate' : ''}}" style="transform: translateX({{food._swipeX || 0}}px);"
+                bind:touchstart="onTouchStart" bind:touchmove="onTouchMove" bind:touchend="onTouchEnd"
+                data-type="group" data-order-items="{{food.orderItems}}" data-item-name="{{food.name}}"
+                data-supplier-idx="{{sIdx}}" data-food-idx="{{fIdx}}">
+                <view class="summary-card">
+                  <view class="summary-card-info">
+                    <view class="summary-card-name-wrap">
+                      <image wx:if="{{food.icon}}" class="summary-card-icon" src="{{food.icon}}" mode="aspectFill" />
+                      <text class="summary-card-name">{{food.name}}</text>
+                    </view>
+                    <text class="summary-card-supplier-label">{{food.restaurantDetails[0].restaurantName}}</text>
+                  </view>
+                  <view class="summary-card-qty">
+                    <view wx:if="{{currentStatus === 'pending'}}" class="item-qty-wrap">
+                      <input class="item-qty-input" type="digit" value="{{food.totalQty}}" data-order-items="{{food.orderItems}}" data-item-name="{{food.name}}" data-min-value="{{food.minValue}}" data-max-value="{{food.maxValue}}" data-unit-name="{{food.unitName}}" bindblur="onGroupQtyChange" />
+                    </view>
+                    <text wx:if="{{currentStatus === 'pending'}}" class="summary-card-unit">{{food.unitName}}</text>
+                    <text wx:if="{{currentStatus !== 'pending'}}" class="summary-card-num font-headline">{{food.totalQty}}</text>
+                    <text wx:if="{{currentStatus !== 'pending'}}" class="summary-card-unit">{{food.unitName}}</text>
+                  </view>
+                </view>
+              </view>
+              <view class="swipe-delete-btn" bind:tap="onDeleteGroupItems" data-order-items="{{food.orderItems}}" data-item-name="{{food.name}}">
+                <text class="swipe-delete-text">删除</text>
+              </view>
+            </view>
+            <!-- 多餐厅：总数只读，按餐厅子项可编辑可删除 -->
+            <view wx:else class="multi-restaurant-group">
+              <view class="summary-card multi-restaurant-header">
+                <view class="summary-card-info">
+                  <text class="summary-card-name">{{food.name}}</text>
+                </view>
+                <view class="summary-card-qty">
+                  <text class="summary-card-num font-headline">{{food.totalQty}}</text>
+                  <text class="summary-card-unit">{{food.unitName}}</text>
+                </view>
+              </view>
+              <view class="restaurant-breakdown">
+                <view class="swipe-wrapper restaurant-swipe-wrapper" wx:for="{{food.restaurantDetails}}" wx:for-item="rd" wx:key="restaurantName" wx:for-index="rdIdx">
+                  <view class="swipe-inner {{rd._animating ? 'swipe-animate' : ''}}" style="transform: translateX({{rd._swipeX || 0}}px);"
+                    bind:touchstart="onTouchStart" bind:touchmove="onTouchMove" bind:touchend="onTouchEnd"
+                    data-supplier-idx="{{sIdx}}" data-food-idx="{{fIdx}}" data-rd-idx="{{rdIdx}}">
+                    <view class="restaurant-breakdown-item" style='background-color:#ffffff'>
+                      <text class="restaurant-breakdown-name">{{rd.restaurantName}}</text>
+                      <view class="restaurant-breakdown-qty-wrap">
+                        <view wx:if="{{currentStatus === 'pending'}}" class="item-qty-wrap">
+                          <input class="item-qty-input item-qty-input-sm" type="digit" value="{{rd.quantity}}" data-order-items="{{rd.orderItems}}" data-item-name="{{food.name}}" data-min-value="{{food.minValue}}" data-max-value="{{food.maxValue}}" data-unit-name="{{food.unitName}}" bindblur="onGroupQtyChange" />
+                        </view>
+                        <text wx:if="{{currentStatus === 'pending'}}" class="restaurant-breakdown-unit">{{food.unitName}}</text>
+                        <text wx:if="{{currentStatus !== 'pending'}}" class="restaurant-breakdown-qty">{{rd.quantity}} {{food.unitName}}</text>
+                      </view>
+                    </view>
+                  </view>
+                  <view class="swipe-delete-btn" bind:tap="onDeleteGroupItems" data-order-items="{{rd.orderItems}}" data-item-name="{{food.name}}({{rd.restaurantName}})">
+                    <text class="swipe-delete-text">删除</text>
+                  </view>
+                </view>
+              </view>
+            </view>
+          </block>
+        </view>
+      </view>
+    </view>
+
+    <!-- 按餐厅视图 -->
+    <view wx:if="{{activeTab === 1 && !loading}}">
+      <view class="supplier-section" wx:for="{{restaurantGroups}}" wx:key="id" wx:for-index="rIdx" wx:if="{{item.items.length>0}}">
+        <view class="section-header">
+          <view class="section-header-left">
+            <text class="section-title font-headline">{{item.name}}</text>
+          </view>
+        </view>
+        <view class="item-cards">
+          <block wx:for="{{item.items}}" wx:for-item="food" wx:key="id" wx:for-index="fIdx">
+            <!-- 单供应商：整项可编辑可滑动删除 -->
+            <view wx:if="{{!food.multiSupplier}}" class="swipe-wrapper">
+              <view class="swipe-inner {{food._animating ? 'swipe-animate' : ''}}" style="transform: translateX({{food._swipeX || 0}}px);"
+                bind:touchstart="onTouchStart" bind:touchmove="onTouchMove" bind:touchend="onTouchEnd"
+                data-type="group" data-order-items="{{food.orderItems}}" data-item-name="{{food.name}}"
+                data-restaurant-idx="{{rIdx}}" data-food-idx="{{fIdx}}">
+                <view class="summary-card">
+                  <view class="summary-card-info">
+                    <view class="summary-card-name-wrap">
+                      <image wx:if="{{food.icon}}" class="summary-card-icon" src="{{food.icon}}" mode="aspectFill" />
+                      <text class="summary-card-name">{{food.name}}</text>
+                    </view>
+                    <text class="summary-card-supplier-label">{{food.supplierDetails[0].supplierName}}</text>
+                  </view>
+                  <view class="summary-card-qty">
+                    <view wx:if="{{currentStatus === 'pending'}}" class="item-qty-wrap">
+                      <input class="item-qty-input" type="digit" value="{{food.totalQty}}" data-order-items="{{food.orderItems}}" data-item-name="{{food.name}}" data-min-value="{{food.minValue}}" data-max-value="{{food.maxValue}}" data-unit-name="{{food.unitName}}" bindblur="onGroupQtyChange" />
+                    </view>
+                    <text wx:if="{{currentStatus === 'pending'}}" class="summary-card-unit">{{food.unitName}}</text>
+                    <text wx:if="{{currentStatus !== 'pending'}}" class="summary-card-num font-headline">{{food.totalQty}}</text>
+                    <text wx:if="{{currentStatus !== 'pending'}}" class="summary-card-unit">{{food.unitName}}</text>
+                  </view>
+                </view>
+              </view>
+              <view class="swipe-delete-btn" bind:tap="onDeleteGroupItems" data-order-items="{{food.orderItems}}" data-item-name="{{food.name}}">
+                <text class="swipe-delete-text">删除</text>
+              </view>
+            </view>
+            <!-- 多供应商：总数只读，按供应商子项可编辑可删除 -->
+            <view wx:else class="multi-restaurant-group">
+              <view class="summary-card multi-restaurant-header">
+                <view class="summary-card-info">
+                  <view class="summary-card-name-wrap">
+                    <image wx:if="{{food.icon}}" class="summary-card-icon" src="{{food.icon}}" mode="aspectFill" />
+                    <text class="summary-card-name">{{food.name}}</text>
+                  </view>
+                </view>
+                <view class="summary-card-qty">
+                  <text class="summary-card-num font-headline">{{food.totalQty}}</text>
+                  <text class="summary-card-unit">{{food.unitName}}</text>
+                </view>
+              </view>
+              <view class="restaurant-breakdown">
+                <view class="swipe-wrapper restaurant-swipe-wrapper" wx:for="{{food.supplierDetails}}" wx:for-item="sd" wx:key="supplierName" wx:for-index="sdIdx">
+                  <view class="swipe-inner {{sd._animating ? 'swipe-animate' : ''}}" style="transform: translateX({{sd._swipeX || 0}}px);"
+                    bind:touchstart="onTouchStart" bind:touchmove="onTouchMove" bind:touchend="onTouchEnd"
+                    data-restaurant-idx="{{rIdx}}" data-food-idx="{{fIdx}}" data-sd-idx="{{sdIdx}}">
+                    <view class="restaurant-breakdown-item" style='background-color:#ffffff'>
+                      <text class="restaurant-breakdown-name">{{sd.supplierName}}</text>
+                      <view class="restaurant-breakdown-qty-wrap">
+                        <view wx:if="{{currentStatus === 'pending'}}" class="item-qty-wrap">
+                          <input class="item-qty-input item-qty-input-sm" type="digit" value="{{sd.quantity}}" data-order-items="{{sd.orderItems}}" data-item-name="{{food.name}}" data-min-value="{{food.minValue}}" data-max-value="{{food.maxValue}}" data-unit-name="{{food.unitName}}" bindblur="onGroupQtyChange" />
+                        </view>
+                        <text wx:if="{{currentStatus === 'pending'}}" class="restaurant-breakdown-unit">{{food.unitName}}</text>
+                        <text wx:if="{{currentStatus !== 'pending'}}" class="restaurant-breakdown-qty">{{sd.quantity}} {{food.unitName}}</text>
+                      </view>
+                    </view>
+                  </view>
+                  <view class="swipe-delete-btn" bind:tap="onDeleteGroupItems" data-order-items="{{sd.orderItems}}" data-item-name="{{food.name}}({{sd.supplierName}})">
+                    <text class="swipe-delete-text">删除</text>
+                  </view>
+                </view>
+              </view>
+            </view>
+          </block>
+        </view>
+      </view>
+    </view>
+
+    <!-- 按食材视图 -->
+    <view wx:if="{{activeTab === 2 && !loading}}">
+      <view class="supplier-section" wx:for="{{ingredientGroups}}" wx:key="id" wx:for-index="iIdx">
+        <view class="section-header">
+          <view class="section-header-left" style='width: 100%;'>
+            <image wx:if="{{item.icon}}" class="section-header-icon" src="{{item.icon}}" mode="aspectFill" />
+            <text class="section-title font-headline">{{item.name}}</text>
+          </view>
+          <view class="summary-card-qty">
+            <text class="summary-card-num font-headline">{{item.totalQty}}</text>
+            <text class="summary-card-unit">{{item.unitName}}</text>
+          </view>
+        </view>
+        <view class="item-cards">
+          <block wx:for="{{item.suppliers}}" wx:for-item="supplier" wx:key="id" wx:for-index="sIdx">
+            <!-- 单餐厅：整项可编辑可滑动删除 -->
+            <view wx:if="{{!supplier.multiRestaurant}}" class="swipe-wrapper">
+              <view class="swipe-inner {{supplier._animating ? 'swipe-animate' : ''}}" style="transform: translateX({{supplier._swipeX || 0}}px);"
+                bind:touchstart="onTouchStart" bind:touchmove="onTouchMove" bind:touchend="onTouchEnd"
+                data-type="group" data-order-items="{{supplier.orderItems}}" data-item-name="{{item.name}}"
+                data-ingredient-idx="{{iIdx}}" data-supplier-idx="{{sIdx}}">
+                <view class="summary-card">
+                  <view class="summary-card-info">
+                    <text class="summary-card-name">{{supplier.name}}</text>
+                    <text class="summary-card-supplier-label">{{supplier.restaurantDetails[0].restaurantName}}</text>
+                  </view>
+                  <view class="summary-card-qty">
+                    <view wx:if="{{currentStatus === 'pending'}}" class="item-qty-wrap">
+                      <input class="item-qty-input" type="digit" value="{{supplier.totalQty}}" data-order-items="{{supplier.orderItems}}" data-item-name="{{item.name}}" data-min-value="{{item.minValue}}" data-max-value="{{item.maxValue}}" data-unit-name="{{item.unitName}}" bindblur="onGroupQtyChange" />
+                    </view>
+                    <text wx:if="{{currentStatus === 'pending'}}" class="summary-card-unit">{{item.unitName}}</text>
+                    <text wx:if="{{currentStatus !== 'pending'}}" class="summary-card-num font-headline">{{supplier.totalQty}}</text>
+                    <text wx:if="{{currentStatus !== 'pending'}}" class="summary-card-unit">{{item.unitName}}</text>
+                  </view>
+                </view>
+              </view>
+              <view class="swipe-delete-btn" bind:tap="onDeleteGroupItems" data-order-items="{{supplier.orderItems}}" data-item-name="{{item.name}}({{supplier.name}})">
+                <text class="swipe-delete-text">删除</text>
+              </view>
+            </view>
+            <!-- 多餐厅：总数只读，按餐厅子项可编辑可删除 -->
+            <view wx:else class="multi-restaurant-group">
+              <view class="summary-card multi-restaurant-header">
+                <view class="summary-card-info">
+                  <text class="summary-card-name">{{supplier.name}}</text>
+                </view>
+                <view class="summary-card-qty">
+                  <text class="summary-card-num font-headline">{{supplier.totalQty}}</text>
+                  <text class="summary-card-unit">{{item.unitName}}</text>
+                </view>
+              </view>
+              <view class="restaurant-breakdown">
+                <view class="swipe-wrapper restaurant-swipe-wrapper" wx:for="{{supplier.restaurantDetails}}" wx:for-item="rd" wx:key="restaurantName" wx:for-index="rdIdx">
+                  <view class="swipe-inner {{rd._animating ? 'swipe-animate' : ''}}" style="transform: translateX({{rd._swipeX || 0}}px);"
+                    bind:touchstart="onTouchStart" bind:touchmove="onTouchMove" bind:touchend="onTouchEnd"
+                    data-ingredient-idx="{{iIdx}}" data-supplier-idx="{{sIdx}}" data-rd-idx="{{rdIdx}}">
+                    <view class="restaurant-breakdown-item" style='background-color:#ffffff'>
+                      <text class="restaurant-breakdown-name">{{rd.restaurantName}}</text>
+                      <view class="restaurant-breakdown-qty-wrap">
+                        <view wx:if="{{currentStatus === 'pending'}}" class="item-qty-wrap">
+                          <input class="item-qty-input item-qty-input-sm" type="digit" value="{{rd.quantity}}" data-order-items="{{rd.orderItems}}" data-item-name="{{item.name}}" data-min-value="{{item.minValue}}" data-max-value="{{item.maxValue}}" data-unit-name="{{item.unitName}}" bindblur="onGroupQtyChange" />
+                        </view>
+                        <text wx:if="{{currentStatus === 'pending'}}" class="restaurant-breakdown-unit">{{item.unitName}}</text>
+                        <text wx:if="{{currentStatus !== 'pending'}}" class="restaurant-breakdown-qty">{{rd.quantity}} {{item.unitName}}</text>
+                      </view>
+                    </view>
+                  </view>
+                  <view class="swipe-delete-btn" bind:tap="onDeleteGroupItems" data-order-items="{{rd.orderItems}}" data-item-name="{{item.name}}({{rd.restaurantName}})">
+                    <text class="swipe-delete-text">删除</text>
+                  </view>
+                </view>
+              </view>
+            </view>
+          </block>
+        </view>
+      </view>
+    </view>
+
+    <view wx:if="{{!loading && currentEmpty}}" class="empty-wrap">
+      <t-empty description="暂无数据" />
+    </view>
+
+    <view style="height: 280rpx;"></view>
+  </scroll-view>
+
+  <!-- 底部操作按钮 -->
+  <view class="bottom-action" wx:if="{{supplierGroups.length > 0 && (currentStatus === 'pending' || currentStatus === 'approved')}}">
+    <view wx:if="{{currentStatus === 'pending'}}" class="bottom-action-btn review-action-btn" bind:tap="onApproveAll">
+      <view class="bottom-action-icon review-icon">
+        <t-icon name="check-circle" size="44rpx" color="#ffffff" />
+      </view>
+      <view class="bottom-action-text">
+        <text class="bottom-action-title">一键审核</text>
+      </view>
+      <t-icon name="chevron-right" size="40rpx" color="rgba(255,255,255,0.5)" />
+    </view>
+    <view wx:elif="{{currentStatus === 'approved'}}" class="bottom-action-btn" bind:tap="onSendAll">
+      <view class="bottom-action-icon">
+        <t-icon name="image" size="44rpx" color="#ffffff" />
+      </view>
+      <view class="bottom-action-text">
+        <text class="bottom-action-title">一键发送供应商</text>
+      </view>
+      <t-icon name="chevron-right" size="40rpx" color="rgba(255,255,255,0.5)" />
+    </view>
+  </view>
+
+  <t-toast id="t-toast" />
+  <t-dialog id="t-dialog" />
+</view>
+<customNav></customNav>

@@ -1,0 +1,24 @@
+services:
+  app:
+    container_name: rest-scm-app
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_AES_KEY: ${NEXT_PUBLIC_AES_KEY}
+    image: rest-scm:1.0
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    env_file:
+      - ./.prod_env
+    environment:
+      NODE_ENV: production
+      NEXT_TELEMETRY_DISABLED: "1"
+      FILE_STORAGE_DIR: /data/uploads
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - rest_scm_uploads:/data/uploads
+volumes:
+  rest_scm_uploads:

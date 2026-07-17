@@ -1,0 +1,8 @@
+{
+  "navigationStyle": "custom",
+  "usingComponents": {
+    "t-empty": "tdesign-miniprogram/empty/empty",
+    "t-stepper": "tdesign-miniprogram/stepper/stepper",
+    "customNav":"../../custom-tab-bar/index"
+  }
+}

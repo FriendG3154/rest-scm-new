@@ -1,0 +1,175 @@
+<view class="list-page">
+  <!-- 顶部导航栏 -->
+  <view class="nav-bar" style="padding-top: {{statusBarHeight}}px;">
+    <view class="nav-bar-inner">
+      <view class="nav-bar-left" bind:tap="showRestaurantPicker">
+        <text class="nav-bar-title font-headline">{{currentRestaurant.name || '选择餐厅'}}</text>
+        <t-icon name="chevron-down" size="32rpx" color="#002045" />
+      </view>
+
+    </view>
+    <view class="nav-bar-divider"></view>
+  </view>
+
+  <!-- 日期和统计区 -->
+  <view class="stats-section" style="margin-top: {{navHeight}}px;">
+    <view class="stats-header">
+      <view>
+        <text class="stats-sub">今日进货清单</text>
+        <text class="stats-date font-headline">{{today}}</text>
+      </view>
+      <view class="stats-badge" wx:if="{{orderItems.length > 0}}">
+        <text class="stats-badge-num">{{orderItems.length}}</text>
+        <text class="stats-badge-label">项</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 清单内容 -->
+  <scroll-view scroll-y class="list-scroll" enhanced show-scrollbar="{{false}}" refresher-enabled refresher-triggered="{{refreshing}}" bindrefresherrefresh="onRefresh">
+    <!-- 空状态 -->
+    <view class="empty-state" wx:if="{{!loading && groupedItems.length === 0}}">
+      <view class="empty-card">
+        <t-icon name="info-circle" size="80rpx" color="#c4c6cf" />
+        <text class="empty-text">{{isApproved ? '今日清单已审核' : '清单暂无内容'}}</text>
+        <text class="empty-sub" wx:if="{{!isApproved}}">点击右下角按钮添加食材</text>
+      </view>
+    </view>
+
+    <!-- 按供应商分组列表 -->
+    <view class="supplier-group" wx:for="{{groupedItems}}" wx:key="supplierId">
+      <view class="supplier-header">
+        <view class="supplier-indicator"></view>
+        <text class="supplier-name">{{item.supplierName}}</text>
+      </view>
+      <view class="item-list">
+        <view class="swipe-wrapper" wx:for="{{item.items}}" wx:for-item="orderItem" wx:key="id">
+          <view class="item-card" style="transform: translateX({{orderItem.id === swipeOpenId ? '-160rpx' : '0'}});" bind:touchstart="onTouchStart" bind:touchmove="onTouchMove" bind:touchend="onTouchEnd" data-item="{{orderItem}}">
+          <image wx:if="{{orderItem.ingredient.icon}}" class="item-icon" src="{{orderItem.ingredient.icon}}" mode="aspectFill" />
+            <view class="item-info">
+              <text class="item-name font-headline">{{orderItem.ingredient.name}}</text>
+            </view>
+            <view class="item-qty-wrap">
+              <input class="item-qty-input" type="digit" value="{{orderItem.quantity}}" data-id="{{orderItem.id}}" data-item="{{orderItem}}" bindblur="onQuantityChange" />
+            </view>
+            <text class="item-unit">{{orderItem.ingredient.unit.name}}</text>
+          </view>
+          <view class="swipe-delete-btn {{orderItem.id === swipeOpenId ? 'swipe-delete-show' : ''}}" bind:tap="onSwipeDelete" data-item="{{orderItem}}">
+            <text>删除</text>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- loading -->
+    <view class="loading-wrap" wx:if="{{loading}}">
+      <t-loading theme="circular" size="48rpx" />
+    </view>
+
+    <view style="height: 200rpx;"></view>
+  </scroll-view>
+
+  <!-- 添加清单按钮（审核后隐藏） -->
+  <view class="fab-wrap" bind:tap="showImportSheet" wx:if="{{!isApproved}}">
+    <view class="fab-btn">
+      <t-icon name="add" size="40rpx" color="#ffffff" />
+      <!-- <text class="fab-text">添加清单</text> -->
+    </view>
+  </view>
+
+  <!-- 餐厅选择弹窗 -->
+  <t-action-sheet visible="{{showRestaurantSheet}}" items="{{restaurantActions}}" bind:selected="onRestaurantSelect" bind:cancel="hideRestaurantPicker" bind:close="hideRestaurantPicker" />
+
+  <!-- 导入清单弹窗 -->
+  <t-popup visible="{{showImport}}" placement="bottom" bind:visible-change="onImportVisibleChange">
+    <view class="import-sheet">
+      <view class="import-handle"></view>
+      <view class="import-header">
+        <view>
+          <text class="import-title font-headline">导入清单</text>
+          <text class="import-sub">从您的模板中快速添加</text>
+        </view>
+        <view class="import-close" bind:tap="hideImportSheet">
+          <t-icon name="close" size="40rpx" color="#111c2c" />
+        </view>
+      </view>
+
+      <!-- 搜索框 -->
+      <view class="import-search-wrap">
+        <t-input placeholder="搜索食材名称" value="{{importSearchKey}}" bind:change="onImportSearchChange" clearable prefixIcon="search" />
+      </view>
+
+      <scroll-view scroll-y class="import-list">
+        <view wx:if="{{filteredIngredientList.length === 0}}" class="import-empty">
+          <text class="import-empty-text">没有找到匹配的食材</text>
+        </view>
+        <view class="import-item {{ingredientSelectedMap[ing.id] ? 'import-item-selected' : ''}}" wx:for="{{filteredIngredientList}}" wx:key="id" wx:for-item="ing" bind:tap="toggleIngredient" data-id="{{ing.id}}">
+          <view class="import-checkbox">
+            <view class="check-box {{ingredientSelectedMap[ing.id] ? 'checked' : ''}}">
+              <t-icon wx:if="{{ingredientSelectedMap[ing.id]}}" name="check" size="28rpx" color="#ffffff" />
+            </view>
+          </view>
+          <view>
+          <image wx:if="{{ing.icon}}" class="import-item-icon" src="{{ing.icon}}" mode="aspectFill" />
+          </view>
+          <view class="import-item-info">
+            <view class="import-item-top">
+              <t-tag wx:if="{{ing.category}}" size="small" variant="light" theme="success">{{ing.category.name}}</t-tag>
+              <text class="import-item-name font-headline">{{ing.name}}</text>
+            </view>
+            <view class="import-item-bottom">
+              <text class="import-item-supplier">单位</text>
+              <text class="import-item-sep">：</text>
+              <text class="import-item-unit">{{ing.unit.name}}</text>
+              <text class="import-item-category" wx:if="{{ing.suppliers.length === 1}}">供应商：{{ing.suppliers[0].supplier.company_name}}</text>
+              <text class="import-item-category" wx:elif="{{ing.suppliers.length > 1 && ingredientSelectedMap[ing.id]}}">已选 {{ingredientSelectedMap[ing.id]}} / {{ing.suppliers.length}} 个供应商</text>
+              <text class="import-item-category" wx:elif="{{ing.suppliers.length > 1}}">供应商：{{ing.suppliers.length}}个</text>
+            </view>
+          </view>
+        </view>
+      </scroll-view>
+
+      <view class="import-footer">
+        <text class="import-count">
+          <text>共</text>
+          <text class="import-count-num">{{selectedCount}}</text>
+          <text>项</text>
+        </text>
+        <view class="import-confirm-btn" bind:tap="confirmImport">
+          <t-icon name="rocket" size="36rpx" color="#ffffff" />
+          <text class="import-confirm-text">确认导入清单</text>
+        </view>
+      </view>
+    </view>
+  </t-popup>
+
+  <t-toast id="t-toast" />
+  <t-dialog id="t-dialog" />
+
+  <!-- 供应商选择弹窗 -->
+  <t-popup visible="{{showSupplierPicker}}" placement="bottom" z-index="12000" bind:visible-change="onSupplierPickerCancel">
+    <view class="supplier-picker-sheet">
+      <view class="supplier-picker-handle"></view>
+      <view class="supplier-picker-header">
+        <text class="supplier-picker-title font-headline">选择供应商</text>
+        <text class="supplier-picker-sub">{{supplierPickerIngredient.name}} 存在多个供应商，请选择</text>
+      </view>
+      <view class="supplier-picker-body">
+        <t-checkbox-group value="{{supplierPickerSelected}}" bind:change="onSupplierPickerChange">
+          <view class="supplier-picker-item" wx:for="{{supplierPickerList}}" wx:key="supplier_id">
+            <t-checkbox value="{{item.supplier_id}}" label="{{item.supplier.company_name}}" content="{{item.is_default ? '默认供应商' : ''}}" />
+          </view>
+        </t-checkbox-group>
+      </view>
+      <view class="supplier-picker-footer">
+        <view class="supplier-picker-cancel-btn" bind:tap="onSupplierPickerCancel">
+          <text>取消</text>
+        </view>
+        <view class="supplier-picker-confirm-btn" bind:tap="onSupplierPickerConfirm">
+          <text>确认</text>
+        </view>
+      </view>
+    </view>
+  </t-popup>
+</view>
+<customNav></customNav>

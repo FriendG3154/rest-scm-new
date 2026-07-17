@@ -1,0 +1,237 @@
+.send-order-page {
+  min-height: 100vh;
+  background-color: #ffffff;
+  border-radius: 32rpx 32rpx 0 0;
+  /* margin-top: 40rpx; */
+  position: relative;
+}
+
+/* 导航栏 */
+.nav-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  background-color: #f0f3ff;
+}
+
+.nav-bar-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16rpx 32rpx;
+  height: 88rpx;
+}
+
+.nav-bar-left {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+}
+
+.nav-bar-title {
+  width: 200rpx;
+  font-size: 32rpx;
+  color: #002045;
+  letter-spacing: -1rpx;
+}
+
+/* 供应商 Tab */
+.supplier-tabs {
+  height: 100rpx;
+  padding: 20rpx 32rpx 12rpx;
+  margin-top: 150rpx;
+  background-color: #ffffff;
+}
+
+.tabs-scroll {
+  height: 100rpx;
+  white-space: nowrap;
+}
+
+.tabs-inner {
+  display: inline-flex;
+  z-index: 9999;
+  gap: 16rpx;
+  padding-bottom: 12rpx;
+  margin-top: 30rpx;
+}
+
+.tab-item {
+  display: inline-flex;
+  padding: 16rpx 32rpx;
+  border-radius: 999rpx;
+  font-size: 24rpx;
+  font-weight: 600;
+  color: #43474e;
+  white-space: nowrap;
+  transition: all 0.2s;
+}
+
+.tab-active {
+  background: linear-gradient(135deg, #002045, #1a365d);
+  color: #ffffff;
+  box-shadow: 0 8rpx 24rpx rgba(0, 32, 69, 0.2);
+}
+
+/* 订单内容 */
+.order-scroll {
+  height: calc(100vh - 300rpx);
+  padding: 0 32rpx;
+  width: calc(100% - 64rpx);
+}
+
+.restaurant-group {
+  margin-bottom: 48rpx;
+}
+
+.restaurant-header {
+  margin-top: 10rpx;
+  margin-bottom: 24rpx;
+}
+
+.restaurant-name {
+  display: block;
+  font-size: 36rpx;
+  color: #002045;
+  letter-spacing: -1rpx;
+}
+
+.restaurant-address {
+  display: block;
+  font-size: 22rpx;
+  color: rgba(67, 71, 78, 0.7);
+  font-weight: 500;
+  margin-top: 4rpx;
+}
+
+/* 表格 */
+.table-header {
+  display: flex;
+  padding: 0 8rpx;
+  margin-bottom: 16rpx;
+}
+
+.table-col-name {
+  flex: 1;
+  font-size: 18rpx;
+  font-weight: 700;
+  color: rgba(67, 71, 78, 0.4);
+  letter-spacing: 2rpx;
+  text-transform: uppercase;
+}
+
+.table-col-qty {
+  flex: 1;
+  text-align: center;
+  font-size: 18rpx;
+  font-weight: 700;
+  color: rgba(67, 71, 78, 0.4);
+  letter-spacing: 2rpx;
+  text-transform: uppercase;
+}
+
+.table-col-unit {
+  flex: 1;
+  text-align: right;
+  font-size: 18rpx;
+  font-weight: 700;
+  color: rgba(67, 71, 78, 0.4);
+  letter-spacing: 2rpx;
+  text-transform: uppercase;
+}
+
+.table-row {
+  display: flex;
+  align-items: center;
+  padding: 12rpx 8rpx;
+}
+
+.row-name-wrap {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 10rpx;
+  min-width: 0;
+}
+
+.row-icon {
+  width: 40rpx;
+  height: 40rpx;
+  border-radius: 6rpx;
+  flex-shrink: 0;
+}
+
+.row-name {
+  font-size: 26rpx;
+  font-weight: 700;
+  color: #111c2c;
+  letter-spacing: -0.5rpx;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.row-qty {
+  flex: 1;
+  text-align: center;
+  font-size: 28rpx;
+  color: #002045;
+}
+
+.row-unit {
+  flex: 1;
+  text-align: right;
+  font-size: 22rpx;
+  color: #43474e;
+}
+
+/* 底部操作栏 */
+.bottom-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 24rpx 48rpx;
+  padding-bottom: calc(env(safe-area-inset-bottom) + 48rpx);
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(40rpx);
+}
+
+.confirm-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16rpx;
+  width: 100%;
+  height: 96rpx;
+  background: linear-gradient(135deg, #9d4400, #fe8439);
+  border-radius: 999rpx;
+  box-shadow: 0 8rpx 32rpx rgba(157, 68, 0, 0.3);
+}
+
+.confirm-btn:active {
+  transform: scale(0.98);
+}
+
+.confirm-text {
+  font-size: 30rpx;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.loading-wrap {
+  display: flex;
+  justify-content: center;
+  padding: 80rpx 0;
+}
+
+/* 离屏 Canvas */
+.order-canvas {
+  position: fixed;
+  left: -9999px;
+  top: 0;
+  width: 750px;
+  height: 2000px;
+}

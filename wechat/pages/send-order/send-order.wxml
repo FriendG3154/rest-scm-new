@@ -1,0 +1,79 @@
+<view class="send-order-page">
+  <!-- 顶部导航栏 -->
+  <view class="nav-bar" style="padding-top: {{statusBarHeight}}px;">
+    <view class="nav-bar-inner">
+      <view class="nav-bar-left" bind:tap="goBack">
+        <t-icon name="chevron-left" size="40rpx" color="#002045" />
+        <text class="nav-bar-title font-headline">发送采购单</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 供应商 Tab 切换 -->
+  <view class="supplier-tabs" style="margin-top: {{navHeight}}px;{{suppliers.length > 1?'':'height:0px'}}" >
+    <scroll-view scroll-x class="tabs-scroll" enhanced show-scrollbar="{{false}}" wx:if="{{suppliers.length > 1}}">
+      <view class="tabs-inner">
+        <view
+          style='z-index: 99999;'
+          class="tab-item {{activeSupplierIdx === index ? 'tab-active' : ''}}"
+          wx:for="{{suppliers}}"
+          wx:key="id"
+          data-index="{{index}}"
+          bind:tap="onSupplierTabChange"
+        >
+          <text>{{item.name}}</text>
+        </view>
+      </view>
+    </scroll-view>
+  </view>
+
+  <!-- 内容区域 -->
+  <scroll-view scroll-y class="order-scroll" enhanced show-scrollbar="{{false}}">
+    <view class="loading-wrap" wx:if="{{loading}}">
+      <t-loading theme="circular" size="48rpx" />
+    </view>
+
+    <!-- 按餐厅分组的订单项 -->
+    <view wx:if="{{!loading}}">
+      <view class="restaurant-group" wx:for="{{currentRestaurantItems}}" wx:key="id">
+        <view class="restaurant-header">
+          <text class="restaurant-name font-headline">{{item.name}}</text>
+          <text class="restaurant-address">{{item.address}}</text>
+        </view>
+
+        <!-- 表头 -->
+        <view class="table-header">
+          <text class="table-col-name">名称</text>
+          <text class="table-col-qty">数量</text>
+          <text class="table-col-unit">单位</text>
+        </view>
+
+        <!-- 数据行 -->
+        <view class="table-row" wx:for="{{item.items}}" wx:for-item="orderItem" wx:key="id">
+          <view class="row-name-wrap">
+            <image wx:if="{{orderItem.ingredientIcon}}" class="row-icon" src="{{orderItem.ingredientIcon}}" mode="aspectFill" />
+            <text class="row-name">{{orderItem.ingredientName}}</text>
+          </view>
+          <text class="row-qty font-headline">{{orderItem.quantity}}</text>
+          <text class="row-unit">{{orderItem.unitName}}</text>
+        </view>
+      </view>
+    </view>
+
+    <view style="height: 320rpx;"></view>
+  </scroll-view>
+
+  <!-- 底部操作 -->
+  <view class="bottom-bar">
+    <view class="confirm-btn" bind:tap="confirmSend">
+      <text class="confirm-text">确认发送给供应商</text>
+      <t-icon name="send" size="36rpx" color="#ffffff" />
+    </view>
+  </view>
+
+  <!-- 离屏 Canvas 用于生成订单图片 -->
+  <canvas type="2d" id="orderCanvas" class="order-canvas"></canvas>
+
+  <t-toast id="t-toast" />
+  <t-dialog id="t-dialog" />
+</view>

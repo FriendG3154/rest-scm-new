@@ -1,0 +1,7 @@
+{
+  "navigationStyle": "custom",
+  "usingComponents": {
+    "t-checkbox": "tdesign-miniprogram/checkbox/checkbox",
+    "t-loading": "tdesign-miniprogram/loading/loading"
+  }
+}

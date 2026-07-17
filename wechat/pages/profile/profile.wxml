@@ -1,0 +1,70 @@
+<view class="profile-page">
+  <!-- 顶部导航栏 -->
+  <view class="nav-bar" style="padding-top: {{statusBarHeight}}px;">
+    <view class="nav-bar-inner">
+      <view class="nav-bar-left">
+      </view>
+    </view>
+  </view>
+
+  <!-- 主要内容 -->
+  <view class="profile-content" style="margin-top: {{navHeight}}px;">
+    <!-- 用户信息卡片 -->
+    <view class="profile-card">
+      <view class="profile-avatar-wrap">
+        <image
+          wx:if="{{userInfo.avatar_url}}"
+          src="{{userInfo.avatar_url}}"
+          class="profile-avatar"
+          mode="aspectFill"
+        />
+        <view wx:else class="profile-avatar-default">
+          <t-icon name="user" size="64rpx" color="#002045" />
+        </view>
+        <view class="verified-badge">
+          <t-icon name="check-circle-filled" size="32rpx" color="#74db9d" />
+        </view>
+      </view>
+      <view class="profile-info">
+        <text class="profile-name font-headline">{{userInfo.name || '未登录'}}</text>
+        <text class="profile-role">{{roleLabel}}</text>
+      </view>
+    </view>
+
+    <!-- 餐厅信息 -->
+    <!-- <view class="menu-section" wx:if="{{restaurants.length > 0}}">
+      <view class="menu-header">
+        <text class="menu-header-text">关联餐厅</text>
+      </view>
+      <view class="menu-list">
+        <view class="menu-item" wx:for="{{restaurants}}" wx:key="id">
+          <view class="menu-item-left">
+            <t-icon name="location" size="36rpx" color="#002045" />
+            <view class="menu-item-info">
+              <text class="menu-item-title">{{item.name}}</text>
+              <text class="menu-item-sub" wx:if="{{item.address}}">{{item.address}}</text>
+            </view>
+          </view>
+          <view class="menu-item-badge" wx:if="{{currentRestaurant.id === item.id}}">
+            <text class="menu-item-badge-text">当前</text>
+          </view>
+        </view>
+      </view>
+    </view> -->
+
+    <!-- 退出登录 -->
+    <view class="logout-wrap">
+      <view class="logout-btn" bind:tap="handleLogout">
+        <t-icon name="logout" size="36rpx" color="#ba1a1a" />
+        <text class="logout-text">退出登录</text>
+      </view>
+    </view>
+
+    <!-- 品牌标识 -->
+
+  </view>
+
+  <t-toast id="t-toast" />
+  <t-dialog id="t-dialog" />
+</view>
+<customNav></customNav>

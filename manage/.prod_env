@@ -1,0 +1,26 @@
+# When adding additional environment variables, the schema in "/src/env.js"
+# should be updated accordingly.
+
+# Prisma
+# https://www.prisma.io/docs/reference/database-reference/connection-urls#env
+DATABASE_URL="postgresql://postgres:admin123456@host.docker.internal:5432/rest-scm"
+
+# 本地附件存储目录（容器内路径）
+FILE_STORAGE_DIR="/data/uploads"
+
+# 可选：用于返回绝对附件地址，例如 https://api.example.com
+# 不配置时将返回相对地址（/api/files/xxx）
+# FILE_BASE_URL="http://localhost:3000"
+
+# HTTP 部署时需要设为 false，否则 secure cookie 不会被浏览器保存
+# 使用 HTTPS 时建议设为 true
+SESSION_COOKIE_SECURE="false"
+
+# JWT
+JWT_SECRET="rest-scm-jwt-secret-key-change-in-production-at-least-32-chars"
+
+# AES 加密密钥（服务端解密用，至少 16 位）
+AES_KEY="1234567890abcdef"
+
+# AES 加密密钥（前端加密用，需与 AES_KEY 一致）
+NEXT_PUBLIC_AES_KEY="1234567890abcdef"

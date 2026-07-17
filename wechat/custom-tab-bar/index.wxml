@@ -1,0 +1,14 @@
+<view class="tab-bar">
+  <view
+    wx:for="{{list}}"
+    wx:key="url"
+    class="tab-bar-item {{active === index ? 'active' : ''}}"
+    data-index="{{index}}"
+    bind:tap="onChange"
+  >
+    <view class="tab-icon-wrap {{active === index ? 'tab-icon-active' : ''}}">
+      <t-icon name="{{item.icon}}" size="44rpx" />
+    </view>
+    <text class="tab-label">{{item.label}}</text>
+  </view>
+</view>

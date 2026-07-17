@@ -1,0 +1,8 @@
+{
+  "name": "rest-scm-wechat",
+  "version": "1.0.0",
+  "description": "XX餐厅",
+  "dependencies": {
+    "tdesign-miniprogram": "^1.13.1"
+  }
+}

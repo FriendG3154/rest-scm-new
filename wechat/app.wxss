@@ -1,0 +1,115 @@
+/**
+ * Culinary Logic 全局样式
+ * 设计系统：The Architectural Ledger
+ */
+
+/* CSS 变量 */
+page {
+  --color-primary: #002045;
+  --color-primary-container: #1a365d;
+  --color-secondary: #9d4400;
+  --color-secondary-container: #fe8439;
+  --color-tertiary-fixed: #91f8b8;
+  --color-on-tertiary-fixed: #002110;
+  --color-surface: #f9f9ff;
+  --color-surface-container-low: #f0f3ff;
+  --color-surface-container: #e7eeff;
+  --color-surface-container-high: #dee8ff;
+  --color-surface-container-highest: #d8e3fa;
+  --color-surface-container-lowest: #ffffff;
+  --color-on-surface: #111c2c;
+  --color-on-surface-variant: #43474e;
+  --color-outline: #74777f;
+  --color-outline-variant: #c4c6cf;
+  --color-error: #ba1a1a;
+
+  background-color: var(--color-surface);
+  color: var(--color-on-surface);
+  /* font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; */
+  font-size: 28rpx;
+  line-height: 1.5;
+}
+
+/* 通用工具类 */
+.flex { display: flex; }
+.flex-col { flex-direction: column; }
+.flex-row { flex-direction: row; }
+.flex-1 { flex: 1; }
+.flex-wrap { flex-wrap: wrap; }
+.items-center { align-items: center; }
+.items-start { align-items: flex-start; }
+.items-end { align-items: flex-end; }
+.items-baseline { align-items: baseline; }
+.justify-center { justify-content: center; }
+.justify-between { justify-content: space-between; }
+.justify-around { justify-content: space-around; }
+.gap-sm { gap: 8rpx; }
+.gap-md { gap: 16rpx; }
+.gap-lg { gap: 24rpx; }
+.gap-xl { gap: 32rpx; }
+
+/* 字体 */
+.font-headline {
+  /* font-family: 'Manrope', -apple-system, BlinkMacSystemFont, sans-serif; */
+  font-weight: 800;
+  /* width: auto; */
+}
+.font-bold { font-weight: 700; }
+.font-semibold { font-weight: 600; }
+.font-medium { font-weight: 500; }
+
+/* 文字大小 */
+.text-xs { font-size: 20rpx; }
+.text-sm { font-size: 24rpx; }
+.text-base { font-size: 28rpx; }
+.text-lg { font-size: 32rpx; }
+.text-xl { font-size: 36rpx; }
+.text-2xl { font-size: 44rpx; }
+.text-3xl { font-size: 56rpx; }
+
+/* 颜色工具类 */
+.text-primary { color: var(--color-primary); }
+.text-secondary { color: var(--color-secondary); }
+.text-on-surface { color: var(--color-on-surface); }
+.text-on-surface-variant { color: var(--color-on-surface-variant); }
+.text-error { color: var(--color-error); }
+.text-white { color: #ffffff; }
+
+.bg-surface { background-color: var(--color-surface); }
+.bg-surface-low { background-color: var(--color-surface-container-low); }
+.bg-surface-high { background-color: var(--color-surface-container-high); }
+.bg-surface-highest { background-color: var(--color-surface-container-highest); }
+.bg-surface-lowest { background-color: var(--color-surface-container-lowest); }
+.bg-primary { background-color: var(--color-primary); }
+
+/* 间距 */
+.px-md { padding-left: 24rpx; padding-right: 24rpx; }
+.px-lg { padding-left: 32rpx; padding-right: 32rpx; }
+.px-xl { padding-left: 48rpx; padding-right: 48rpx; }
+.py-sm { padding-top: 8rpx; padding-bottom: 8rpx; }
+.py-md { padding-top: 16rpx; padding-bottom: 16rpx; }
+.py-lg { padding-top: 24rpx; padding-bottom: 24rpx; }
+.mb-sm { margin-bottom: 8rpx; }
+.mb-md { margin-bottom: 16rpx; }
+.mb-lg { margin-bottom: 24rpx; }
+.mb-xl { margin-bottom: 32rpx; }
+
+/* 圆角 */
+.rounded-sm { border-radius: 8rpx; }
+.rounded-md { border-radius: 12rpx; }
+.rounded-lg { border-radius: 16rpx; }
+.rounded-xl { border-radius: 24rpx; }
+.rounded-2xl { border-radius: 32rpx; }
+.rounded-full { border-radius: 999rpx; }
+
+/* 隐藏滚动条 */
+::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+/* 安全区域 */
+.safe-bottom {
+  padding-bottom: calc(env(safe-area-inset-bottom) + 120rpx);
+}

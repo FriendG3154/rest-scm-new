@@ -1,0 +1,240 @@
+.login-page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48rpx;
+  position: relative;
+  overflow: hidden;
+  background-color: #f9f9ff;
+}
+
+/* 背景装饰圆 */
+.bg-circle {
+  position: fixed;
+  border-radius: 50%;
+  pointer-events: none;
+}
+.bg-circle-1 {
+  width: 600rpx;
+  height: 600rpx;
+  top: -200rpx;
+  left: -200rpx;
+  background-color: #dee8ff;
+  opacity: 0.4;
+}
+.bg-circle-2 {
+  width: 800rpx;
+  height: 800rpx;
+  bottom: -300rpx;
+  right: -400rpx;
+  background-color: #d8e3fa;
+  opacity: 0.3;
+}
+
+.login-content {
+  width: 100%;
+  max-width: 680rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  z-index: 1;
+}
+
+/* 品牌区域 */
+.brand-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 80rpx;
+}
+
+.brand-icon {
+  width: 120rpx;
+  height: 120rpx;
+  border-radius: 24rpx;
+  /* background: linear-gradient(135deg, #002045, #1a365d); */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 32rpx;
+  box-shadow: 0 16rpx 48rpx rgba(0, 32, 69, 0.2);
+}
+.t-checkbox--block {
+  padding: 0rpx !important;
+}
+.t-checkbox {
+  background:transparent !important;
+}
+
+.brand-title {
+  /* font-family: 'Manrope', -apple-system, sans-serif; */
+  font-size: 52rpx;
+  font-weight: 800;
+  color: #002045;
+  letter-spacing: -2rpx;
+  margin-bottom: 8rpx;
+}
+
+.brand-subtitle {
+  font-size: 24rpx;
+  color: #43474e;
+  font-weight: 500;
+  letter-spacing: 1rpx;
+}
+
+/* 表单区域 */
+.form-section {
+  width: 100%;
+}
+
+.input-group {
+  margin-bottom: 32rpx;
+}
+
+.input-label {
+  display: block;
+  font-size: 20rpx;
+  font-weight: 700;
+  color: #43474e;
+  letter-spacing: 3rpx;
+  margin-bottom: 12rpx;
+  padding-left: 4rpx;
+}
+
+.input-field {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+  height: 96rpx;
+  padding: 0 28rpx;
+  background-color: #d8e3fa;
+  border-radius: 20rpx;
+  border: 2rpx solid transparent;
+  transition: all 0.3s;
+}
+
+.input-field.input-focus {
+  background-color: #ffffff;
+  border-color: rgba(69, 95, 136, 0.2);
+}
+
+.input-field input {
+  flex: 1;
+  font-size: 28rpx;
+  color: #111c2c;
+  font-weight: 500;
+}
+
+.input-placeholder {
+  color: rgba(116, 119, 127, 0.6);
+}
+
+.password-toggle {
+  padding: 8rpx;
+}
+
+/* 登录按钮 */
+.login-btn-wrap {
+  margin-top: 48rpx;
+  margin-bottom: 40rpx;
+}
+
+.login-btn-wrap .t-button {
+  height: 96rpx !important;
+  border-radius: 20rpx !important;
+  font-size: 32rpx !important;
+  font-weight: 700 !important;
+  background: linear-gradient(135deg, #002045, #1a365d) !important;
+  border: none !important;
+}
+
+/* 分隔线 */
+.divider {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  margin-bottom: 32rpx;
+}
+
+.divider-line {
+  flex: 1;
+  height: 1rpx;
+  background-color: #dee8ff;
+}
+
+.divider-text {
+  padding: 0 24rpx;
+  font-size: 20rpx;
+  font-weight: 700;
+  color: #74777f;
+  letter-spacing: 4rpx;
+}
+
+/* 微信登录 */
+.wechat-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16rpx;
+  width: 100%;
+  height: 96rpx;
+  border-radius: 20rpx;
+  border: 1rpx solid #c4c6cf;
+  background-color: #ffffff;
+  transition: all 0.2s;
+  /* 重置 button 默认样式 */
+  padding: 0;
+  margin: 0;
+  line-height: normal;
+  font-size: inherit;
+}
+
+.wechat-btn::after {
+  border: none;
+}
+
+.wechat-btn:active {
+  background-color: #f0f3ff;
+  transform: scale(0.98);
+}
+
+.wechat-icon {
+  width: 44rpx;
+  height: 44rpx;
+}
+
+.wechat-text {
+  font-size: 28rpx;
+  font-weight: 700;
+  color: #111c2c;
+}
+
+.wechat-btn-loading {
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+/* 用户协议 */
+.agreement-section {
+  display: flex;
+  align-items: flex-start;
+  gap: 12rpx;
+  margin-top: 80rpx;
+  padding: 0 16rpx;
+}
+
+.agreement-text {
+  font-size: var(--td-checkbox-font-size,32rpx);
+
+  color: #43474e;
+  font-weight: 500;
+  line-height: 1.6;
+}
+
+.agreement-link {
+  color: #002045;
+  font-weight: 700;
+}
